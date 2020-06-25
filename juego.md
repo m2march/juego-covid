@@ -1,20 +1,35 @@
-## Objetivo
+## Objetivo para la existencia del juego
 
 Mostrar que, si no frenás el contagio a tiempo, las acciones después son muy
 tardías; en particular por el tiempo que tarda en ser sintomático.
 
 ## Reglas
 
+### Objetivo
+
+El éxito en el juego se mide a partir de dos variables:
+
+* Cantidad de muertos
+* Felicidad total de la población
+
+El objetivo es lograr la menor cantidad de muertos y la mayor felicidad
+poblacional luego de administrar la cuarentena durante 100 días (¿quizá
+menos?).
+
+Al final de los 100 días se presentan ambos valores. No se combinan los valores
+jústamente para que sea un punto de decisión del jugador si compite por
+felicidad o por muertes.
+
 ### Personas
 
 Las personas tienen 5 estados posibles:
 
-* Sano
-* Contagiado sin síntomas
-* Contagiado pre-síntomas
-* Contagiado con síntomas
-* Recuperado
-* Muerto
+* Sano (celeste)
+* Contagiado sin síntomas (celeste)
+* Contagiado pre-síntomas (celeste)
+* Contagiado con síntomas (violeta)
+* Recuperado (verde)
+* Muerto (negro)
 
 El estado cambia de un día al siguiente. Las transiciones son:
 
