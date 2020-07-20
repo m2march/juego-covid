@@ -35,15 +35,15 @@ El estado cambia de un día al siguiente. Las transiciones son:
 
 * Sano -> Sano (si no tuvo contacto con ningún contagiado)
 * Sano -> Contagiado sin síntomas 
-    (p = 0.1, si estuvo en contacto con un contagiado pre-síntomas en espacio laboral)
+    (p = 0.08, si estuvo en contacto con un contagiado pre-síntomas en espacio laboral)
 * Sano -> Contagiado sin síntomas 
-    (p = 0.5, si estuvo en contacto con un contagiado pre-síntomas en una reunión)
+    (p = 0.3, si estuvo en contacto con un contagiado pre-síntomas en una reunión)
 * Contagiado sin síntomas -> Contagiado pre-síntomas
     (p = 1 a los 5 días de haber pasado a contagiado sin síntomas)
 * Contagiado pre-síntomas -> Contagiado con síntomas
     (p = 1 a los 2 días de haber pasado a contagiado sin síntomas)
 * Contagiado con-síntomas -> Recuperado
-    (p = 0.93 a los 9 síntomas de haber empezado con síntomas)
+    (p = 0.97 a los 9 síntomas de haber empezado con síntomas)
 * Contagiado con-síntomas -> Muerto 
     (p = 0.03 a los 9 síntomas de haber empezado con síntomas)
 
@@ -89,5 +89,13 @@ porcentaje establecido de los habilitados a trabajar en orden de esenciales.
 
 ### Reuniones
 
-`TODO`
+Cada persona tiene una lista de amistades ordenadas por prioridad.
 
+Las personas además tienen un orden en el que deciden organizar reuniones.
+
+Casa día, las siguientes K personas sin síntomas (empezando desde la última que
+organizó una reunión) organiza una reunión con las personas de su lista, en
+órden, que no tienen ya una reunión, hasta llegar a la cantidad permitida.
+Además, una persona que fue invitada a una reunión no puede organizar una
+reunión, por lo que si le tocaba organizar una reunión se la saltea y se pasa a
+la siguiente.
