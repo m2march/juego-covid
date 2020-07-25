@@ -45,6 +45,8 @@ class Person {
 
     this.radius = p_height * 0.8 / 2;
     this.friends = random.shuffle([...Array(Game.p_total).keys()]);
+
+    this.workplace_index = -1;
   }
 
   draw() {
@@ -86,5 +88,12 @@ class Person {
       InfectedState.SYMPTOMATIC
     ]);
     return sick_states.has(this.infectedState);
+  }
+
+  can_work() {
+    const no_work_states = new Set([
+      InfectedState.SYMPTOMATIC, InfectedState.DEAD
+    ]);
+    return !no_work_states.has(this.infectedState);
   }
 }

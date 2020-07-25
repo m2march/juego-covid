@@ -32,23 +32,28 @@ class Game {
     this.canvasRight = this.canvas.offsetWidth;
     this.canvasBottom = this.canvas.offsetHeight;
 
-    // Personas con lugares de trabajo
-    this.init_workspace_assignments();
-    // Orden de prioridad de personas
-    this.p_priority = this.random.shuffle([...Array(Game.p_total).keys() ]);
-
     this.map = new GameMap(
         this.context, this.random,
         {canvas_height : this.canvas.height, canvas_width : this.canvas.width});
+    this.ppl = this.map.people;
+
+    // Orden de prioridad de personas
+    this.p_priority = this.random.shuffle(this.ppl);
+    this.meeting_p_index = 0;
+    
+    // Personas con lugares de trabajo
+    this.init_workspace_assignments();
 
     // window.requestAnimationFrame((timeStamp) => { this.gameLoop(timeStamp)
     // });
     this.clearCanvas();
     this.map.draw();
-    this.ppl = this.map.people;
   }
 
   init_workspace_assignments() {
+    // this.workspace_assignment: 
+    //  * len of Game.p_total
+    //  * goes to workplace index
     this.workspace_assignment = new Array();
     var workspace_indices = [...Array(Game.w_total).keys() ];
     // First draw
@@ -73,6 +78,10 @@ class Game {
       }
     }
 
+    for (var i = 0; i < this.workspace_assignment.length; i++) {
+      this.ppl[i].workplace_index = this.workspace_assignment[i];
+    }
+
     // Debug workspace distribution
     // var inverse = new Map();
     // for (var i = 0; i < this.workspace_assignment.length; i++) {
@@ -85,25 +94,101 @@ class Game {
     // console.log('Inverse', inverse);
   }
 
-  workphase() {
-    this.workspace_assignment.forEach((ps) => {
+
+  /**
+   * Performs the workphase of the day.
+   *
+   * Receives as parameter the mobility percentage, which indicates which
+   * percentage of non-symptomatics go to work. 
+   *
+   * The function selects who goes to work and fills the workplaces with 
+   * people. Then calculates contagion for each workplace, updating the state
+   * of each person.
+   *
+   * @param {float in [0, 1]} mobility_percent - percentage of non symptomatics 
+   * that go to their workplace
+   */
+  workphase(mobility_percent) {
+    var workplaces = [...Array(Game.w_total).keys()].map((x) => []);
+    var can_work_ppl = this.p_priority.filter((p) => p.can_work());
+    var will_work_count = Math.round(can_work_ppl.length * mobility_percent);
+
+    for (var i = 0; i < will_work_count; i++) {
+      workplaces[can_work_ppl[i].workplace_index].push(can_work_ppl[i]);
+    }
+
+    workspaces.forEach((ps) => {
       contagion(ps, Game.w_contagion);
     });
   }
 
+  /**
+   * Performs the meetings phase of the day.
+   *
+   * The number of meetings per day is constant as defined by Game.t_meetings.
+   *
+   * Moving in priority order, starting on the person following the last that
+   * had a meeting, people are selected to arrange a meeting. People that can
+   * create a meeting are the same that can work. They invite meeting_size 
+   * people that can work, in order of their friendships. A person already
+   * invited to a meeting cannot create a meeting.
+   *
+   * Once meetings are created, contagion is calculated for each meeting.
+   *
+   * @param {int >= 0} meeting_size - max number of people allowed in meetings
+   */
+  meeting_phase(meeting_size) {
+    var meetings = [];
+
+    var ppl_index_in_meeting = new Set();
+
+    while (meetings.length < Game.t_meetings) {
+      var current_p = this.p_priority[this.meeting_p_index];
+      if (current_p.can_work() && !ppl_index_in_meeting.has(current_p.index)) {
+        ppl_index_in_meeting.add(current_p.index);
+        var meeting = [current_p];
+        for (var i = 0; 
+             i < current_p.friends.length && meeting.length < meeting_size; 
+             i++) {
+          var current_i = this.ppl[current_p.friends[i]];
+          if (current_i.can_work() && !ppl_index_in_meeting.has(current_i.index)) {
+            meeting.push(current_i);
+            ppl_index_in_meeting.add(current_i.index);
+          }
+        }
+        meetings.push(meeting);
+      }
+      this.meeting_p_index = (this.meeting_p_index + 1) % this.ppl.length;
+    }
+
+    meetings.forEach((ps) => contagion(ps, Game.m_contagion));
+  }
+
+  /**
+   * Contagion simulation in gathering.
+   *
+   * The probabilty a person gets sick is `prob` ** #sick people in gathering
+   *
+   * It asumes everyone interacts with everyone once, and each interaction has
+   * a `prob` chance to transmit the desease.
+   *
+   * @param {Array[Person]} ps - People in the gathering
+   * @param {float in [0, 1]} prob - Probability of contagion per interaction
+   */
   contagion(ps, prob) {
+    var will_get_sick = [];
+
     ps.forEach((p) => {
       ps.forEach((p2) => {
         if (p != p2 && p.is_contagious() && !p2.is_sick()) {
           if (this.random.uniform() < prob) {
-            p2.make_sick();
+            will_get_sick.push(p2);
           }
         }
       });
     });
-  }
 
-  meeting_phase() {
+    will_get_sick.forEach((p) => p.make_sick());
   }
 
   clearCanvas() {
@@ -112,8 +197,6 @@ class Game {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  workphase() {
-  }
 }
 
 // Game constants
@@ -128,3 +211,5 @@ Game.m_contagion = 0.3;
 Game.w_per_row = 3;
 Game.w_per_col = 11;
 Game.w_total = Game.w_per_row * Game.w_per_col * 2;
+
+Game.t_meetings = 10;
