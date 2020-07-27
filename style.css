@@ -8,9 +8,21 @@
     --deaths: #373d3e;
     --is-home: #cacaca;
     --is-moving: #AAAAAA;
+    /* --text: #666666; */
+    --text: #555555;
 
+    --days: var(--text);
+    --healthy : #B1F1F6;
+    --symptomatic : #C4C1E9;
+    --recovered : #F4BC7B;
+    --dead : #141414;
+    --happiness: #5CA33E;
     /* --recovered: #8b6cff;  */
     /* --gosick: var(--healthy); */
+    --asymptomatic: var(--healthy);
+    --presymptomatic: var(--healthy);
+
+    --healthy-stats: #6DE5EE;
 }
 
 html,
@@ -42,7 +54,7 @@ h1 {
 }
 
 h2 {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--contagious);
     text-transform: uppercase;
 }
@@ -51,9 +63,17 @@ p,
 a, 
 li {
     font-weight: 400;
-    font-size: 13px;
-    color: var(--healthy);
+    font-size: 16px;
+    color: var(--text);
     text-decoration: none;
+}
+
+a {
+    text-decoration: underline;
+}
+
+a.hover {
+    color: var(--text-hover);
 }
 
 ul {
@@ -125,6 +145,11 @@ ul {
     min-height: 750px; */
 }
 
+.graph__fill {
+    width: 250px;
+    height: 150px;
+}
+
 .stats {
     /* display: flex; */
     /* flex-flow: row wrap; */
@@ -142,27 +167,31 @@ ul {
 
 .stats__header {
     font-size: 16px;
-    color: #646464;
+    /*color: #646464;*/
+}
+
+.stats__days {
+     color: var(--days-stats);
 }
 
 .stats__healthy {
-    /* color: var(--healthy); */
+     color: var(--healthy-stats);
 }
 
-.stats__contagious {
-    color: var(--contagious);
+.stats__symptomatic {
+    color: var(--symptomatic);
 }
 
 .stats__recovered {
     color: var(--recovered);
 }
 
-.stats__hospitalized {
-    color: var(--hospitalized);
+.stats__dead {
+    color: var(--dead);
 }
 
-.stats__deaths {
-    color: var(--deaths);
+.stats__happiness {
+    color: var(--happiness);
 }
 
 .stats__got-sick {
@@ -231,10 +260,6 @@ ul {
 }
 
 
-
-
-
-
 .modal {
     position: fixed;
     top: 0;
@@ -249,9 +274,12 @@ ul {
     transition: opacity 300ms linear;
 }
 .modal__inner {
-    width: 320px;
+    width: 60%;
     background-color: white;
     padding: 30px;
+}
+.modal__close {
+    text-align: right;
 }
 
 .modal__button {
@@ -268,12 +296,24 @@ ul {
     font-weight: bold;
     cursor: pointer;
 }
+.modal__day {
+    left: 300px;
+}
+
+.modal__day > .modal__inner {
+    width: auto;
+}
 
 .modal--is-hidden {
     opacity: 0;
+    display: none;
     pointer-events: none;
 }
 
+#instructions_modal {
+    position: absolute;
+    height: fit-content;
+}
 
 
 .intro {

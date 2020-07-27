@@ -44,10 +44,21 @@ class Game {
     // Personas con lugares de trabajo
     this.init_workspace_assignments();
 
+    this.days = 0;
+
     // window.requestAnimationFrame((timeStamp) => { this.gameLoop(timeStamp)
     // });
     this.clearCanvas();
     this.map.draw();
+        
+    this.daysCountEl = document.querySelector('.stats__days-count');
+    this.totalHealthyCountEl = document.querySelector('.stats__healthy-count');
+    this.symptomaticCountEl = document.querySelector('.stats__symptomatic-count');
+    this.recoveredCountEl = document.querySelector('.stats__recovered-count');
+    this.deadCountEl = document.querySelector('.stats__dead-count');
+    this.happinessCountEl = document.querySelector('.stats__happiness-count');
+
+    this.updateStats();
   }
 
   init_workspace_assignments() {
@@ -190,6 +201,45 @@ class Game {
 
     will_get_sick.forEach((p) => p.make_sick());
   }
+    
+  updateStats() {
+
+    var stats = {}
+    stats[InfectedState.HEALTHY] = 0;
+    stats[InfectedState.SYMPTOMATIC] = 0;
+    stats[InfectedState.RECOVERED] = 0;
+    stats[InfectedState.DEAD] = 0;
+    var happiness = 0;
+
+    this.ppl.forEach((p) => {
+      if (p.infectedState == InfectedState.SYMPTOMATIC) {
+        stats[InfectedState.SYMPTOMATIC]++;
+      } else if (p.infectedState == InfectedState.RECOVERED) {
+        stats[InfectedState.RECOVERED]++;
+      } else if (p.infectedState == InfectedState.DEAD) {
+        stats[InfectedState.DEAD]++;
+      } else {
+        stats[InfectedState.HEALTHY]++;
+      }
+      happiness += p.happiness;
+    });
+
+    this.daysCountEl.textContent = this.days;
+    this.totalHealthyCountEl.textContent = stats[InfectedState.HEALTHY];
+    this.symptomaticCountEl.textContent = stats[InfectedState.SYMPTOMATIC];
+    this.recoveredCountEl.textContent = stats[InfectedState.RECOVERED];
+    this.deadCountEl.textContent = stats[InfectedState.DEAD];
+    this.happinessCountEl.textContent = happiness;
+
+    /*
+    this.statusBarHealthyEl.style.transform = `scaleX(${totalHealthyCount / 1000})`;
+    this.statusBarContagiousEl.style.transform = `scaleX(${contagiousCount / 1000})`;
+    this.statusBarRecoveredEL.style.transform = `scaleX(${recoveredCount / 1000})`;
+    this.statusBarHospitalizeEL.style.transform = `scaleX(${hospitalizedCount / 1000})`;
+    this.statusBarDeathsEL.style.transform = `scaleX(${totalDeathCount / 1000})`;
+    this.statusBarGotcontagiousEl.style.transform = `scaleX(${(1000 - totalHealthyCount) / 1000})`;
+    */
+  }
 
   clearCanvas() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -213,3 +263,5 @@ Game.w_per_col = 11;
 Game.w_total = Game.w_per_row * Game.w_per_col * 2;
 
 Game.t_meetings = 10;
+Game.h_init = 100;
+Game.d_total = 100;

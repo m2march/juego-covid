@@ -9,23 +9,6 @@ InfectedState = {
   DEAD : 5
 }
 
-// Colors
-Colors = {
-  sky_blue_crayola : 'hsla(184, 52%, 89%, 1)',
-  maximum_blue_purple : 'hsla(244, 26%, 95%, 1)',
-  granny_smith_apple : 'hsla(102, 35%, 92%, 1)',
-  eerie_black : 'hsla(0, 0%, 8%, 1)',
-  flirt : 'hsla(318, 81%, 55%, 1)'
-}
-
-InfectedColors = {} InfectedColors[InfectedState.HEALTHY] =
-    Colors.sky_blue_crayola;
-InfectedColors[InfectedState.ASYMPTOMATIC] = Colors.sky_blue_crayola;
-InfectedColors[InfectedState.PRESYMPTOMATIC] = Colors.sky_blue_crayola;
-InfectedColors[InfectedState.SYMPTOMATIC] = Colors.maximum_blue_purple;
-InfectedColors[InfectedState.RECOVERED] = Colors.granny_smith_apple;
-InfectedColors[InfectedState.DEAD] = Colors.eerie_black;
-
 class Person {
   constructor(context, random, {index, x, y, infectedState, p_width, p_height}) {
     this.context = context;
@@ -37,6 +20,7 @@ class Person {
     this.y = y;
 
     this.sick_days = -1;
+    this.happiness = Game.h_init;
 
     this.dot = {
       x : this.x + p_width / 2,

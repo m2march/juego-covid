@@ -58,8 +58,8 @@ class GameMap {
     this.houses_width = this.person_width * this.p_per_row;
     this.houses_height = this.person_height * this.p_per_col;
     
-    this.houses_x = houses_x;
-    this.houses_y = houses_y;
+    this.houses_x = houses_x + (houses_max_width - this.houses_width) / 2;
+    this.houses_y = houses_y + (houses_max_height - this.houses_height) / 2;
 
     let first_sick = Math.round(this.random.uniform() * Game.p_total);
     let houses_x_margin = this.houses_x;

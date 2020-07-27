@@ -15,11 +15,11 @@
     </script>
     -->
     <meta charset="UTF-8">
-    <title>Covid-19 Contagion Simulator</title>
+    <title>Corona.io - Juego de simulación de Covid-19</title>
     <meta name="description"
         content="Containing the spread of COVID-19 is everyone’s responsibility. Even if you aren't showing any symptoms, the best thing you can do is to stay home. Self-isolation, i.e., staying at home, will only work to stop this virus if everyone does it.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="Covid-19 Contagion Simulator">
+    <meta property="og:title" content="Corona.io - Juego de simulación de Covid-19">
     <meta property="og:image" content="http://covid19simulator.com/share.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap"
         rel="stylesheet">
@@ -27,11 +27,13 @@
     <script
         src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
     </script>
+    <script type="text/javascript" src="js/lib/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="js/Random.js"></script>
     <script type="text/javascript" src="js/Person.js"></script>
     <script type="text/javascript" src="js/Workplace.js"></script>
     <script type="text/javascript" src="js/Map.js"></script>
     <script type="text/javascript" src="js/Game.js"></script>
+    <script type="text/javascript" src="js/Visual.js"></script>
 </head>
 
 <body>
@@ -40,18 +42,95 @@
     <script async defer crossorigin="anonymous"
         src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0&appId=152119184941695&autoLogAppEvents=1"></script>
 
-    <!--
-    <div class="intro modal">
+    <div class="intro modal" id="intro_modal">
         <div class="modal__inner">
-            <h1 class="header__title">COVID-19</h1>
-            <h2>CONTAGION SIMULATOR</h2>
-            <p>To run this simulator, fill in the blank in the following statement.</p>
-            <h1>"During the covid-19 global pandemic, I'm ________."</h1>
-            <button class="modal__button" value="home">Staying at home</button>
-            <button class="modal__button" value="moving">Leaving the house</button>
+            <h1 class="header__title">CORONA.IO</h1>
+            <h2>Juego de simulación de Covid-19</h2>
+            <p>
+            El juego consiste en lograr la menor cantidad de muertes,
+            tratando de preservar la felicidad poblacional, tomando dos
+            decisiones cada día:
+            </p>
+
+            <ul>
+            <li>Qué porcentaje de la población va a trabajar.</li>
+            <li>Cuál es el tamaño máximo de reuniones entre personas.</li>
+            </ul>
+
+            <p>
+            El principio de cada dia se te presentará cuantas personas tienen
+            síntomas y deberás decidir cómo se desarrollará ese día. El juego
+            permite jugar 100 días.
+
+            Para ver más detalles de las reglas de la simulación, 
+            <a id="show_instructions_link" href="#">presionar aquí</a>.
+            </p>
+            <button class="modal__button" id="jugar_btn" value="jugar">¡Jugar!</button>
         </div>
     </div>
-    -->
+    
+    <div class="modal modal__day" id="day_modal">
+        <div class="modal__inner">
+            <h1 class="header__title">DÍA: <span id="current_day">10</span></h1>
+            <table style="width: 100%">
+                <tr>
+                    <td><h2>Nuevos casos: <span id="new_cases"></span></h2>
+                    <td><h2>Nuevas muertes: <span id="new_deads"></span></h2>
+                </tr>
+                <tr>
+                    <td><div class="graph__fill"></div></h2>
+                    <td><div class="graph__fill"></div></h2>
+                </tr>
+                <tr>
+                    <th colspan="2" style="text-align: left"><h2>¿Qué hacemos hoy?</h2></th>
+                </tr>
+                <tr>
+                    <td>
+                        <h3>Movilidad de trabajadores: <span
+                                    id="mobility"></span></h3>
+                        <input class="percent__input" type="range" style="width:100%"
+                        min=".01" max=".99" step=".01" value=".2">
+                    </td>
+                    <td>
+                        <h3>Reuniones: <span
+                                    id="meetings"></span></h3>
+                        <input class="percent__input" type="range" style="width:100%"
+                        min="0" max="20" step="1" value="2">
+                    </td>
+                </tr>
+            </table>
+            <button class="modal__button" id="day__btn" value="day">
+                Empezar el día
+            </button>
+        </div>
+    </div>
+
+    <div class="modal modal--is-hidden" id="instructions_modal">
+        <div class="modal__inner">
+            <div class="modal__close"><a id="close_instructions_link" href="#">x</a></div>
+            <h1 class="header__title">CORONA.IO</h1>
+            <h2>Juego de simulación de Covid-19</h2>
+            <div id="instructions_text">
+            <p>
+            El juego consiste en lograr la menor cantidad de muertes,
+            tratando de preservar la felicidad poblacional, tomando dos
+            decisiones cada día:
+            </p>
+
+            <ul>
+            <li>Qué porcentaje de la población va a trabajar.</li>
+            <li>Cuál es el tamaño máximo de reuniones entre personas.</li>
+            </ul>
+
+            <p>
+            El principio de cada dia se te presentará cuantas personas tienen
+            síntomas y deberás decidir cómo se desarrollará ese día. El juego
+            permite jugar 100 días.
+            </p>
+            </div>
+        </div>
+    </div>
+
     <div class="modal results modal--is-hidden ">
         <div class="modal__inner">
             <div class="results__data"></div>
@@ -67,36 +146,59 @@
     </div>
     <div class="wrapper">
         <div class="header">
-            <h1 class="header__title">COVID-19</h1>
-            <h2>CONTAGION SIMULATOR</h2>
-            <p class="header__description">Containing the spread of COVID-19 is everyone’s responsibility. Even if
-                you aren't showing any symptoms, the best thing you can do is to stay home. Self-isolation, i.e.,
-                staying at home, will only work to stop this virus if everyone does it.</p>
+            <h1 class="header__title">CORONA.IO</h1>
+            <h2>Juego de simulación de contagios de COVID-19</h2>
+            <p class="header__description">
+            El juego consiste en lograr la menor cantidad de muertes,
+            tratando de preservar la felicidad poblacional, tomando dos
+            decisiones cada día:
+            </p>
 
-            <h2>SIMULATING</h2>
-            <h1 class="percent__title"><span></span> percent of people staying home</h1>
-            <input class="percent__input" type="range" style="width:100%" min=".01" max=".99" step=".01" value=".2">
-            <p>Drag the slider to start a new simulation. Each simulation starts with 990 healthy people and 10
-                people contageous with Covid-19</p>
+            <ul>
+            <li>Qué porcentaje de la población va a trabajar.</li>
+            <li>Cuál es el tamaño máximo de reuniones entre personas.</li>
+            </ul>
 
+            <p>
+            El principio de cada dia se te presentará cuantas personas tienen
+            síntomas y deberás decidir cómo se desarrollará ese día. El juego
+            permite jugar 100 días.
+
+            Para ver más detalles de las reglas de la simulación, 
+            <a id="show_instructions_link2" href="#">presionar aquí</a>.
+            </p>
+
+            <!--
             <div class="fb-share-button" data-href="http://covid19simulator.com/" data-layout="button_count"
                 data-size="small"><a target="_blank"
                     href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fcovid19simulator.com%2F&amp;src=sdkpreparse"
                     class="fb-xfbml-parse-ignore">Share</a></div>
+            -->
 
             <!-- <button class="speed-controls__fast-forward" value="moving">Fast-forward</button> -->
             <!-- <button class="speed-controls__skip-to-end" value="moving">Skip to the end</button> -->
-        </div>
-        <div class="footer">
+
+            <h2 style="font-size: 18pt"> ESTADÍSTICAS </h2>
+            <div class="header__description">
+            <!--
             <div class="graph-mask">
                 <canvas id="graph" width="760" height="100">
                     Your browser does not support the HTML5 canvas tag.
                 </canvas>
             </div>
-            <div class="stats">
+            -->
+
                 <!-- <h1>STATISTICS</h1> -->
                 <div class="stat">
-                    <h1 class="stats__header stats__healthy">HEALTHY <span
+                    <h1 class="stats__header stats__days">DIAS: <span
+                            class="stats__stat-figure stats__days-count"></span><span
+                            class="stats__of1000">/1000</span></h1>
+                    <div class="status__bar-scale">
+                        <div class="stats__bar stats__bar-dias"></div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <h1 class="stats__header stats__healthy">SALUDABLES: <span
                             class="stats__stat-figure stats__healthy-count"></span><span
                             class="stats__of1000">/1000</span></h1>
                     <div class="status__bar-scale">
@@ -104,23 +206,15 @@
                     </div>
                 </div>
                 <div class="stat">
-                    <h1 class="stats__header stats__contagious">CONTAGIOUS <span
-                            class="stats__stat-figure stats__contagious-count"></span><span
+                    <h1 class="stats__header stats__symptomatic">SINTOMÁTICOS: <span
+                            class="stats__stat-figure stats__symptomatic-count"></span><span
                             class="stats__of1000">/1000</span></h1>
                     <div class="status__bar-scale">
                         <div class="stats__bar stats__bar-contagious"></div>
                     </div>
                 </div>
                 <div class="stat">
-                    <h1 class="stats__header stats__hospitalized">IN HOSPITAL <span
-                            class="stats__stat-figure stats__hospitalized-count"></span><span
-                            class="stats__of1000">/1000</span></h1>
-                    <div class="status__bar-scale">
-                        <div class="stats__bar stats__bar-hospitalized"></div>
-                    </div>
-                </div>
-                <div class="stat">
-                    <h1 class="stats__header stats__recovered">RECOVERED <span
+                    <h1 class="stats__header stats__recovered">RECUPERADOS: <span
                             class="stats__stat-figure stats__recovered-count"></span><span
                             class="stats__of1000">/1000</span></h1>
                     <div class="status__bar-scale">
@@ -128,57 +222,36 @@
                     </div>
                 </div>
                 <div class="stat">
-                    <h1 class="stats__header stats__deaths">TOTAL DEATHS <span
-                            class="stats__stat-figure stats__death-count"></span><span
+                    <h1 class="stats__header stats__dead">MUERTOS: <span
+                            class="stats__stat-figure stats__dead-count"></span><span
                             class="stats__of1000">/1000</span></h1>
+                    <div class="status__bar-scale">
+                        <div class="stats__bar stats__bar-hospitalized"></div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <h1 class="stats__header stats__happiness">FELICIDAD: <span
+                            class="stats__stat-figure stats__happiness-count"></span></h1>
                     <div class="status__bar-scale">
                         <div class="stats__bar stats__bar-deaths"></div>
                     </div>
                 </div>
-                <div class="stat">
-                    <h1 class="stats__header stats__got-contagious">TOTAL CASES <span
-                            class="stats__stat-figure stats__percent-contracted"></span><span
-                            class="stats__of1000">/1000</span></h1>
-                    <div class="status__bar-scale">
-                        <div class="stats__bar stats__bar-got-contagious"></div>
-                    </div>
-                </div>
             </div>
-
-            <h2>ASSUMPTIONS</h2>
-            <p>Our understanding of the Covid-19 virus is evolving everyday. This simulation is based on preliminary
-                data available in mid-March 2020 and the sources are cited articles below for reference. Please use it
-                as an illustration of how a virus like Covid-19 can spread based on the extent people
-                effectively isolate themselves. The simulation assumes the following:</p>
-            <ul>
-                <li>The virus is contagious for 14 days</li>
-                <li>15% of all cases require hopitalization</li>
-                <li>3% of all cases result in death</li>
-                <li>There's roughtly 2 available hospital beds per 1000 people in the US</li>
-                <li>People who have gotten the virus and recovered will not infect others</li>
-            </ul>
 
             <h2>REFERENCES</h2>
-            <ul>
-                <li><a target="_blank" href="https://www.washingtonpost.com/graphics/2020/world/corona-simulator/">
-                        Washington Post</a>
-                </li>
-                <li><a href="https://www.statnews.com/2020/03/10/simple-math-alarming-answers-covid-19/">STAT</a>
-                </li>
-                <li><a target="_blank"
-                        href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(20)30566-3/fulltext">The
-                        Lancet</a></li>
-            </ul>
-
-            <div class="made-by">
+            <p>
+            Fuertemente inspirado en el trabajo de 
                 <a target="_blank" href="https://www.linkedin.com/in/mikedodg/">
-                    <p>Made in self-isolation by:</p>
-                    <p>Mike Dodge
+                    Mike Dodge
                         <img class="linkedin"
                             src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" />
-                    </p>
+                </a>:
+
+                <li><a target="_blank" href="http://covid19simulator.com/">
+                    http://covid19simulator.com
                 </a>
-            </div>
+                </li>
+            </p>
         </div>
         <canvas id="canvas" width="100" height="100">
             Your browser does not support the HTML5 canvas tag.
@@ -187,6 +260,7 @@
     <script>
         // Listen to the onLoad event, then create a game world
         window.onload = function () {
+            initVisual();
             game = new Game('canvas');
         }
     </script>
