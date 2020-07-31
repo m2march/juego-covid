@@ -24,6 +24,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet"
+              href="bower_components/chartist/dist/chartist.min.css">
+    <script src="bower_components/chartist/dist/chartist.min.js"></script>
     <script
         src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
     </script>
@@ -69,37 +72,42 @@
         </div>
     </div>
     
-    <div class="modal modal__day" id="day_modal">
+    <div class="modal modal__day modal--is-hidden" id="day_modal">
         <div class="modal__inner">
             <h1 class="header__title">DÍA: <span id="current_day">10</span></h1>
             <table style="width: 100%">
                 <tr>
                     <td><h2>Nuevos casos: <span id="new_cases"></span></h2>
-                    <td><h2>Nuevas muertes: <span id="new_deads"></span></h2>
+                    <td class="day__column_sep"></td>
+                    <td><h2>Nuevas muertes: <span id="new_deaths"></span></h2>
                 </tr>
                 <tr>
-                    <td><div class="graph__fill"></div></h2>
-                    <td><div class="graph__fill"></div></h2>
+                    <td><div class="ct-chart ct-major-sixth" id="plot_cases"></div></h2>
+                    <td class="day__column_sep"></td>
+                    <td><div class="ct-chart ct-major-sixth" id="plot_deaths"></div></h2>
                 </tr>
                 <tr>
-                    <th colspan="2" style="text-align: left"><h2>¿Qué hacemos hoy?</h2></th>
+                    <th colspan="2" style="text-align: left; padding-top: 3%;"><h2>¿Qué hacemos hoy?</h2></th>
                 </tr>
                 <tr>
                     <td>
-                        <h3>Movilidad de trabajadores: <span
-                                    id="mobility"></span></h3>
+                        <h3>Movilidad de trabajadores: 
+                            <span id="mobility">YY</span>
+                        </h3>
                         <input class="percent__input" type="range" style="width:100%"
-                        min=".01" max=".99" step=".01" value=".2">
+                        min=".01" max=".99" step=".01" value=".2"
+                        id="mobility_input">
                     </td>
+                    <td class="day__column_sep"></td>
                     <td>
                         <h3>Reuniones: <span
-                                    id="meetings"></span></h3>
+                                    id="meetings">XX</span></h3>
                         <input class="percent__input" type="range" style="width:100%"
-                        min="0" max="20" step="1" value="2">
+                        min="0" max="20" step="1" value="2" id="meetings_input">
                     </td>
                 </tr>
             </table>
-            <button class="modal__button" id="day__btn" value="day">
+            <button class="modal__button" id="day_btn" value="day">
                 Empezar el día
             </button>
         </div>

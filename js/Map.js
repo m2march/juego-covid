@@ -10,7 +10,7 @@ class GameMap {
     let workspaces_margin_width = canvas_width * GameMap.workspace_margin_width;
     let workspaces_max_width = canvas_width * GameMap.workspace_width_prop;
     let houses_max_width = (canvas_width - (workspaces_max_width * 2) -
-                            workspaces_margin_width * 2);
+                            workspaces_margin_width * 4);
     let houses_margin_height = canvas_height * GameMap.houses_margin_height;
     let houses_max_height = canvas_height - houses_margin_height * 2;
     let houses_x = workspaces_max_width + workspaces_margin_width;
@@ -90,10 +90,16 @@ class GameMap {
                                     canvas_height / Game.w_per_col);
     this.workspace_height = this.workspace_width;
 
+    let workspaces_x_margin = (
+      (canvas_width - this.houses_width - 
+        this.workspace_width * Game.w_per_row * 2) / 4
+    );
+
     this.workspaces_x = [
-      0,
-      canvas_width - workspaces_max_width
+      workspaces_x_margin,
+      canvas_width - workspaces_max_width + workspaces_x_margin
     ]
+    console.log(this.workspaces_x);
 
     let workspace_x_margin = ((workspaces_max_width - 
                                (this.workspace_width * Game.w_per_row)
