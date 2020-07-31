@@ -45,6 +45,7 @@ class Game {
     this.init_workspace_assignments();
 
     this.days = 0;
+    this.stats = new Map();
 
     // window.requestAnimationFrame((timeStamp) => { this.gameLoop(timeStamp)
     // });
@@ -59,6 +60,7 @@ class Game {
     this.happinessCountEl = document.querySelector('.stats__happiness-count');
 
     this.updateStats();
+    this.queryDay();
   }
 
   init_workspace_assignments() {
@@ -201,35 +203,43 @@ class Game {
 
     will_get_sick.forEach((p) => p.make_sick());
   }
+
+  generateStats() {
+    if (!this.stats.has(this.days)) {
+      var stats = {}
+      stats[InfectedState.HEALTHY] = 0;
+      stats[InfectedState.SYMPTOMATIC] = 0;
+      stats[InfectedState.RECOVERED] = 0;
+      stats[InfectedState.DEAD] = 0;
+      stats['happiness'] = 0;
+
+      this.ppl.forEach((p) => {
+        if (p.infectedState == InfectedState.SYMPTOMATIC) {
+          stats[InfectedState.SYMPTOMATIC]++;
+        } else if (p.infectedState == InfectedState.RECOVERED) {
+          stats[InfectedState.RECOVERED]++;
+        } else if (p.infectedState == InfectedState.DEAD) {
+          stats[InfectedState.DEAD]++;
+        } else {
+          stats[InfectedState.HEALTHY]++;
+        }
+        stats['happiness'] += p.happiness;
+      });
+      this.stats[this.days] = stats;
+    }
+  }
     
   updateStats() {
+    this.generateStats();
 
-    var stats = {}
-    stats[InfectedState.HEALTHY] = 0;
-    stats[InfectedState.SYMPTOMATIC] = 0;
-    stats[InfectedState.RECOVERED] = 0;
-    stats[InfectedState.DEAD] = 0;
-    var happiness = 0;
-
-    this.ppl.forEach((p) => {
-      if (p.infectedState == InfectedState.SYMPTOMATIC) {
-        stats[InfectedState.SYMPTOMATIC]++;
-      } else if (p.infectedState == InfectedState.RECOVERED) {
-        stats[InfectedState.RECOVERED]++;
-      } else if (p.infectedState == InfectedState.DEAD) {
-        stats[InfectedState.DEAD]++;
-      } else {
-        stats[InfectedState.HEALTHY]++;
-      }
-      happiness += p.happiness;
-    });
+    var stats = this.stats[this.days];
 
     this.daysCountEl.textContent = this.days;
     this.totalHealthyCountEl.textContent = stats[InfectedState.HEALTHY];
     this.symptomaticCountEl.textContent = stats[InfectedState.SYMPTOMATIC];
     this.recoveredCountEl.textContent = stats[InfectedState.RECOVERED];
     this.deadCountEl.textContent = stats[InfectedState.DEAD];
-    this.happinessCountEl.textContent = happiness;
+    this.happinessCountEl.textContent = stats['happiness'];
 
     /*
     this.statusBarHealthyEl.style.transform = `scaleX(${totalHealthyCount / 1000})`;
@@ -239,6 +249,27 @@ class Game {
     this.statusBarDeathsEL.style.transform = `scaleX(${totalDeathCount / 1000})`;
     this.statusBarGotcontagiousEl.style.transform = `scaleX(${(1000 - totalHealthyCount) / 1000})`;
     */
+  }
+
+  extractStats(key) {
+    var ret = [];
+    for (const item of this.stats) {
+      ret.push(item[1][key]);
+    }
+    return ret;
+  }
+
+  queryDay() {
+    new Chartist.Line("#plot_cases", {
+      labels: [...this.stats.keys()],
+      series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
+    });
+    new Chartist.Line("#plot_deaths", {
+      labels: [...this.stats.keys()],
+      series: [[this.extractStats(InfectedState.DEAD)]]
+    });
+    $("#current_day").text(this.days);
+    document.querySelector("#" + 'day_modal').classList.toggle("modal--is-hidden");
   }
 
   clearCanvas() {
@@ -265,3 +296,6 @@ Game.w_total = Game.w_per_row * Game.w_per_col * 2;
 Game.t_meetings = 10;
 Game.h_init = 100;
 Game.d_total = 100;
+
+Game.init_meetings = 2;
+Game.init_mobility = 0.75;

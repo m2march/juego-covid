@@ -296,12 +296,30 @@ ul {
     font-weight: bold;
     cursor: pointer;
 }
+
 .modal__day {
     left: 300px;
+    width: auto;
 }
 
-.modal__day > .modal__inner {
+.modal__day .modal__inner {
     width: auto;
+}
+
+.modal__day .ct-chart {
+    margin-top: 10pt;
+}
+
+#day_modal .modal__inner {
+    width: 70%;
+}
+
+.modal__day td {
+    width: 49%; 
+}
+
+.modal__day .day__column_sep {
+    width: 2%; 
 }
 
 .modal--is-hidden {
