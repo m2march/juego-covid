@@ -105,7 +105,6 @@ class Game {
         },
       }
     );
-    this.queryDay();
   }
 
   init_workspace_assignments() {
