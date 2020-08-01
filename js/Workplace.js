@@ -6,6 +6,16 @@ class Workplace {
     this.width = width;
     this.height = height;
 
+    this.center = {
+      x: this.x + this.width * 0.5,
+      y: this.y + this.height * 0.65
+    };
+
+    this.text_center = {
+      x: this.x + this.width * 0.6,
+      y: this.y + this.height * 0.75
+    }
+
     this.drawing_pos = [
       [2, 45.7],
       [8.1, 45.7],
@@ -39,5 +49,13 @@ class Workplace {
     this.drawing_pos.map((p) => ctx.lineTo(x + p[0] * width,
                                            y - p[1] * height));
     ctx.stroke();
+  }
+
+  draw_count(count) {
+    this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
+    this.context.font = 'bold 20px sans-serif';
+    this.context.fillStyle = InfectedColors[InfectedState.ASYMPTOMATIC];
+    this.context.fillText(count.toString(), this.text_center.x, this.text_center.y);
   }
 }

@@ -36,6 +36,7 @@ class Game {
         this.context, this.random,
         {canvas_height : this.canvas.height, canvas_width : this.canvas.width});
     this.ppl = this.map.people;
+    this.ws = this.map.workspaces;
 
     // Orden de prioridad de personas
     this.p_priority = this.random.shuffle(this.ppl);
@@ -46,11 +47,11 @@ class Game {
 
     this.days = 0;
     this.stats = new Map();
+    this.first_sick();
 
     // window.requestAnimationFrame((timeStamp) => { this.gameLoop(timeStamp)
     // });
-    this.clearCanvas();
-    this.map.draw();
+    this.draw();
         
     this.daysCountEl = document.querySelector('.stats__days-count');
     this.totalHealthyCountEl = document.querySelector('.stats__healthy-count');
@@ -59,14 +60,57 @@ class Game {
     this.deadCountEl = document.querySelector('.stats__dead-count');
     this.happinessCountEl = document.querySelector('.stats__happiness-count');
 
+    this.mobilityInput = document.querySelector('#mobility_input');
+    this.meetingsInput = document.querySelector('#meetings_input');
+
+    this.dayBtn = document.querySelector('#day_btn');
+    this.dayBtn.addEventListener('click', this.performDay.bind(this));
+
+    this.playBtn = document.querySelector('#jugar_btn');
+    this.playBtn.addEventListener('click', this.queryDay.bind(this));
+
+    //this.plot_deaths = new Chartist.Line('#plot_deaths', {
+    //  labels: [...this.stats.keys()],
+    //  series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
+    //});
+    //this.plot_cases = new Chartist.Line('#plot_cases', {
+    //  labels: [...this.stats.keys()],
+    //  series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
+    //});
     this.updateStats();
-    this.queryDay();
+    
+    this.plot_deaths = new Chart(document.querySelector('#plot_deaths'),
+      {
+        type: 'line',
+        data: {
+          labels: [...this.stats.keys()],
+          datasets: [{
+            label: "Muertes acumuladas",
+            data: [this.extractStats(InfectedState.DEAD)],
+            //backgroundColor: InfectedColors[InfectedState.DEAD]
+          }]
+        },
+      }
+    );
+    this.plot_cases = new Chart(document.querySelector('#plot_cases'),
+      {
+        type: 'line',
+        data: {
+          labels: [...this.stats.keys()],
+          datasets: [{
+            label: "Casos acumulados",
+            data: [this.extractStats(InfectedState.SYMPTOMATIC)],
+            //backgroundColor: InfectedColors[InfectedState.SYMPTOMATIC]
+          }]
+        },
+      }
+    );
   }
 
   init_workspace_assignments() {
     // this.workspace_assignment: 
     //  * len of Game.p_total
-    //  * goes to workplace index
+    //  * goes to workspace index
     this.workspace_assignment = new Array();
     var workspace_indices = [...Array(Game.w_total).keys() ];
     // First draw
@@ -92,7 +136,7 @@ class Game {
     }
 
     for (var i = 0; i < this.workspace_assignment.length; i++) {
-      this.ppl[i].workplace_index = this.workspace_assignment[i];
+      this.ppl[i].workspace_index = this.workspace_assignment[i];
     }
 
     // Debug workspace distribution
@@ -107,6 +151,17 @@ class Game {
     // console.log('Inverse', inverse);
   }
 
+  first_sick() {
+    for (var pi in this.p_priority) {
+      var p = this.p_priority[pi];
+      var w_assignment = this.workspace_assignment[p.index];
+      var coworkers = this.workspace_assignment.filter((x) => x == w_assignment);
+      if (coworkers.length > 13) {
+        p.make_sick();
+        return;
+      }
+    }
+  }
 
   /**
    * Performs the workphase of the day.
@@ -114,25 +169,106 @@ class Game {
    * Receives as parameter the mobility percentage, which indicates which
    * percentage of non-symptomatics go to work. 
    *
-   * The function selects who goes to work and fills the workplaces with 
-   * people. Then calculates contagion for each workplace, updating the state
+   * The function selects who goes to work and fills the workspaces with 
+   * people. Then calculates contagion for each workspace, updating the state
    * of each person.
    *
    * @param {float in [0, 1]} mobility_percent - percentage of non symptomatics 
-   * that go to their workplace
+   * that go to their workspace
    */
   workphase(mobility_percent) {
-    var workplaces = [...Array(Game.w_total).keys()].map((x) => []);
+    var workspaces = [...Array(Game.w_total).keys()].map((x) => []);
     var can_work_ppl = this.p_priority.filter((p) => p.can_work());
     var will_work_count = Math.round(can_work_ppl.length * mobility_percent);
 
     for (var i = 0; i < will_work_count; i++) {
-      workplaces[can_work_ppl[i].workplace_index].push(can_work_ppl[i]);
+      workspaces[can_work_ppl[i].workspace_index].push(can_work_ppl[i]);
     }
 
     workspaces.forEach((ps) => {
-      contagion(ps, Game.w_contagion);
+      this.contagion(ps, Game.w_contagion);
     });
+
+    return workspaces;
+  }
+
+  /**
+   * Performs the animations of the day.
+   *
+   * @param {Array[Person]} workspaces - array of array of people indexed by workspace id
+   * @param {Array[Person]} meetings - array of array of people. First person
+   * in array is meeting initiator.
+   */
+  dayAnimations(workspaces, meetings) {
+    let start;
+    let animation_phase;
+
+    function step(timestamp) {
+      if (start === undefined) {
+        start = timestamp;
+        animation_phase = Game.day_phases.GO_TO_WORK;
+      }
+      var elapsed = timestamp - start;
+    
+      if (animation_phase == Game.day_phases.GO_TO_WORK) {
+        if (elapsed < Game.animation_settings.goToWorkplacesDur) {
+          var progress = elapsed / Game.animation_settings.goToWorkplacesDur;
+        } else {
+          var progress = 1;
+        }
+
+        for (var wi = 0; wi < workspaces.length; wi++) {
+          var workspace = this.ws[wi];
+          for (var p of workspaces[wi]) {
+            p.go_to(workspace.center.x, workspace.center.y, progress);
+          }
+        }
+        this.draw();
+
+        if (elapsed < Game.animation_settings.goToWorkplacesDur) {
+          window.requestAnimationFrame(step.bind(this));
+        } else {
+          start = timestamp;
+          animation_phase = Game.day_phases.STAY_IN_WORK;
+
+          for (var wi = 0; wi < workspaces.length; wi++) {
+            var workspace = this.ws[wi];
+            workspace.draw_count(workspaces[wi].length);
+          }
+          window.requestAnimationFrame(step.bind(this));
+        }
+      } else if (animation_phase == Game.day_phases.STAY_IN_WORK) {
+        if (elapsed > Game.animation_settings.stayInWorkplacesDur) {
+          start = timestamp;
+          animation_phase = Game.day_phases.GO_BACK_FROM_WORK;
+        } 
+        window.requestAnimationFrame(step.bind(this));
+      } else if (animation_phase == Game.day_phases.GO_BACK_FROM_WORK) {
+        if (elapsed < Game.animation_settings.goBackHomeDur) {
+          var progress = elapsed / Game.animation_settings.goBackHomeDur;
+        } else {
+          var progress = 1;
+        }
+
+        for (var wi = 0; wi < workspaces.length; wi++) {
+          for (var p of workspaces[wi]) {
+            var workspace = this.ws[wi];
+            p.go_to(workspace.center.x, workspace.center.y, 1 - progress);
+          }
+        }
+        this.draw();
+
+        if (elapsed < Game.animation_settings.goBackHomeDur) {
+          window.requestAnimationFrame(step.bind(this));
+        } else {
+          start = undefined;
+          animation_phase = Game.day_phases.END;
+          this.endDay();
+        }
+      } 
+    }
+
+    window.requestAnimationFrame(step.bind(this));
   }
 
   /**
@@ -174,7 +310,9 @@ class Game {
       this.meeting_p_index = (this.meeting_p_index + 1) % this.ppl.length;
     }
 
-    meetings.forEach((ps) => contagion(ps, Game.m_contagion));
+    meetings.forEach((ps) => this.contagion(ps, Game.m_contagion));
+
+    return meetings;
   }
 
   /**
@@ -204,6 +342,22 @@ class Game {
     will_get_sick.forEach((p) => p.make_sick());
   }
 
+  performDay() {
+    var workspaces = this.workphase(this.mobilityInput.valueAsNumber);
+    var meetings = this.meeting_phase(this.meetingsInput.valueAsNumber);
+    this.dayAnimations(workspaces, meetings);
+  }
+
+  endDay() {
+    for (var p of this.ppl) {
+      p.next_day(this.random);
+    }
+    this.days++;
+    this.updateStats();
+    this.draw();
+    this.queryDay();
+  }
+
   generateStats() {
     if (!this.stats.has(this.days)) {
       var stats = {}
@@ -225,14 +379,14 @@ class Game {
         }
         stats['happiness'] += p.happiness;
       });
-      this.stats[this.days] = stats;
+      this.stats.set(this.days, stats);
     }
   }
     
   updateStats() {
     this.generateStats();
 
-    var stats = this.stats[this.days];
+    var stats = this.stats.get(this.days);
 
     this.daysCountEl.textContent = this.days;
     this.totalHealthyCountEl.textContent = stats[InfectedState.HEALTHY];
@@ -260,14 +414,14 @@ class Game {
   }
 
   queryDay() {
-    new Chartist.Line("#plot_cases", {
-      labels: [...this.stats.keys()],
-      series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
-    });
-    new Chartist.Line("#plot_deaths", {
-      labels: [...this.stats.keys()],
-      series: [[this.extractStats(InfectedState.DEAD)]]
-    });
+    console.log([...this.stats.keys()]);
+    this.plot_cases.data.labels = [...this.stats.keys()];
+    this.plot_cases.data.datasets[0].data = this.extractStats(InfectedState.SYMPTOMATIC);
+    this.plot_cases.update();
+    this.plot_deaths.data.labels = [...this.stats.keys()];
+    this.plot_deaths.data.datasets[0].data = this.extractStats(InfectedState.DEAD);
+    this.plot_deaths.update();
+
     $("#current_day").text(this.days);
     document.querySelector("#" + 'day_modal').classList.toggle("modal--is-hidden");
   }
@@ -278,6 +432,12 @@ class Game {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
+  draw() {
+    this.clearCanvas();
+    this.map.draw();
+  }
+
+
 }
 
 // Game constants
@@ -285,8 +445,8 @@ class Game {
 // People
 Game.p_total = 900;
 Game.p_dead = 0.03
-Game.w_contagion = 0.08;
-Game.m_contagion = 0.3;
+Game.w_contagion = 0.3;
+Game.m_contagion = 0.6;
 
 // Workspaces
 Game.w_per_row = 3;
@@ -299,3 +459,19 @@ Game.d_total = 100;
 
 Game.init_meetings = 2;
 Game.init_mobility = 0.75;
+
+Game.animation_settings = {
+  goToWorkplacesDur: 1 * 1000,
+  stayInWorkplacesDur: 2 * 1000,
+  goBackHomeDur: 1 * 1000,
+  waitForMeetings: 3,
+  goToMeetingsDur: 1.2,
+  stayInMeetingsDur: 2,
+}
+
+Game.day_phases = {
+  GO_TO_WORK: 0,
+  STAY_IN_WORK: 1,
+  GO_BACK_FROM_WORK: 2,
+  END: -1
+};

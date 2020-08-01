@@ -61,7 +61,6 @@ class GameMap {
     this.houses_x = houses_x + (houses_max_width - this.houses_width) / 2;
     this.houses_y = houses_y + (houses_max_height - this.houses_height) / 2;
 
-    let first_sick = Math.round(this.random.uniform() * Game.p_total);
     let houses_x_margin = this.houses_x;
     let houses_y_margin = this.houses_y;
 
@@ -76,7 +75,7 @@ class GameMap {
             index: index, 
             x: houses_x_margin + x,
             y: houses_y_margin + y,
-            infectedState: index == first_sick ? InfectedState.HEALTHY : InfectedState.ASYMPTOMATIC,
+            infectedState: InfectedState.HEALTHY,
             p_width: this.person_width,
             p_height: this.person_height
           }
