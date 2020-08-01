@@ -78,6 +78,7 @@ class Game {
     //  series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
     //});
     this.updateStats();
+<<<<<<< HEAD
     
     this.plot_deaths = new Chart(document.querySelector('#plot_deaths'),
       {
@@ -105,6 +106,7 @@ class Game {
         },
       }
     );
+    this.queryDay();
   }
 
   init_workspace_assignments() {
@@ -342,6 +344,7 @@ class Game {
     will_get_sick.forEach((p) => p.make_sick());
   }
 
+<<<<<<< HEAD
   performDay() {
     var workspaces = this.workphase(this.mobilityInput.valueAsNumber);
     var meetings = this.meeting_phase(this.meetingsInput.valueAsNumber);
@@ -358,6 +361,8 @@ class Game {
     this.queryDay();
   }
 
+=======
+>>>>>>> c818c1ed3aeafe50de8983ce39e2925278696054
   generateStats() {
     if (!this.stats.has(this.days)) {
       var stats = {}
@@ -379,14 +384,22 @@ class Game {
         }
         stats['happiness'] += p.happiness;
       });
+<<<<<<< HEAD
       this.stats.set(this.days, stats);
+=======
+      this.stats[this.days] = stats;
+>>>>>>> c818c1ed3aeafe50de8983ce39e2925278696054
     }
   }
     
   updateStats() {
     this.generateStats();
 
+<<<<<<< HEAD
     var stats = this.stats.get(this.days);
+=======
+    var stats = this.stats[this.days];
+>>>>>>> c818c1ed3aeafe50de8983ce39e2925278696054
 
     this.daysCountEl.textContent = this.days;
     this.totalHealthyCountEl.textContent = stats[InfectedState.HEALTHY];
@@ -414,6 +427,7 @@ class Game {
   }
 
   queryDay() {
+<<<<<<< HEAD
     console.log([...this.stats.keys()]);
     this.plot_cases.data.labels = [...this.stats.keys()];
     this.plot_cases.data.datasets[0].data = this.extractStats(InfectedState.SYMPTOMATIC);
@@ -423,6 +437,16 @@ class Game {
     this.plot_deaths.update();
 
     $("#current_day").text(this.days);
+=======
+    new Chartist.Line("#plot_cases", {
+      labels: [...this.stats.keys()],
+      series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
+    });
+    new Chartist.Line("#plot_deaths", {
+      labels: [...this.stats.keys()],
+      series: [[this.extractStats(InfectedState.DEAD)]]
+    });
+>>>>>>> c818c1ed3aeafe50de8983ce39e2925278696054
     document.querySelector("#" + 'day_modal').classList.toggle("modal--is-hidden");
   }
 
@@ -459,6 +483,7 @@ Game.d_total = 100;
 
 Game.init_meetings = 2;
 Game.init_mobility = 0.75;
+<<<<<<< HEAD
 
 Game.animation_settings = {
   goToWorkplacesDur: 1 * 1000,
@@ -475,3 +500,5 @@ Game.day_phases = {
   GO_BACK_FROM_WORK: 2,
   END: -1
 };
+=======
+>>>>>>> c818c1ed3aeafe50de8983ce39e2925278696054
