@@ -78,7 +78,6 @@ class Game {
     //  series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
     //});
     this.updateStats();
-<<<<<<< HEAD
     
     this.plot_deaths = new Chart(document.querySelector('#plot_deaths'),
       {
@@ -344,7 +343,6 @@ class Game {
     will_get_sick.forEach((p) => p.make_sick());
   }
 
-<<<<<<< HEAD
   performDay() {
     var workspaces = this.workphase(this.mobilityInput.valueAsNumber);
     var meetings = this.meeting_phase(this.meetingsInput.valueAsNumber);
@@ -382,6 +380,7 @@ class Game {
         }
         stats['happiness'] += p.happiness;
       });
+
       this.stats.set(this.days, stats);
     }
   }
