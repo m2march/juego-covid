@@ -78,6 +78,7 @@ class Game {
     //  series: [[this.extractStats(InfectedState.SYMPTOMATIC)]]
     //});
     this.updateStats();
+<<<<<<< HEAD
     
     this.plot_deaths = new Chart(document.querySelector('#plot_deaths'),
       {
@@ -105,6 +106,7 @@ class Game {
         },
       }
     );
+    this.queryDay();
   }
 
   init_workspace_assignments() {
@@ -342,6 +344,7 @@ class Game {
     will_get_sick.forEach((p) => p.make_sick());
   }
 
+<<<<<<< HEAD
   performDay() {
     var workspaces = this.workphase(this.mobilityInput.valueAsNumber);
     var meetings = this.meeting_phase(this.meetingsInput.valueAsNumber);
