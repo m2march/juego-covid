@@ -13,12 +13,12 @@ class GameMap {
                             workspaces_margin_width * 4);
     let houses_margin_height = canvas_height * GameMap.houses_margin_height;
     let houses_max_height = canvas_height - houses_margin_height * 2;
-    let houses_x = workspaces_max_width + workspaces_margin_width;
+    let houses_x = workspaces_max_width + workspaces_margin_width * 2;
     let houses_y = houses_margin_height;
     
     this.initHousesGrid({houses_max_width, canvas_height});
     this.initHouses({houses_max_width, houses_max_height, houses_x, houses_y});
-    this.initWorkplaces({workspaces_max_width,
+    this.initWorkplaces({workspaces_max_width, workspaces_margin_width,
                          canvas_width, canvas_height});
   }
 
@@ -84,19 +84,15 @@ class GameMap {
     }
   }
 
-  initWorkplaces({workspaces_max_width, canvas_width, canvas_height}) {
+  initWorkplaces({workspaces_max_width, workspaces_margin_width, 
+                  canvas_width, canvas_height}) {
     this.workspace_width = Math.min(workspaces_max_width / Game.w_per_row,
                                     canvas_height / Game.w_per_col);
     this.workspace_height = this.workspace_width;
 
-    let workspaces_x_margin = (
-      (canvas_width - this.houses_width - 
-        this.workspace_width * Game.w_per_row * 2) / 4
-    );
-
     this.workspaces_x = [
-      workspaces_x_margin,
-      canvas_width - workspaces_max_width + workspaces_x_margin
+      workspaces_margin_width,
+      canvas_width - workspaces_max_width - workspaces_margin_width
     ]
     console.log(this.workspaces_x);
 

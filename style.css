@@ -10,6 +10,9 @@
     --is-moving: #AAAAAA;
     /* --text: #666666; */
     --text: #555555;
+    --disclaimer: #DE7254;
+
+    --background: #f4f4f4;
 
     --days: var(--text);
     --healthy : #B1F1F6;
@@ -32,7 +35,7 @@ body {
     font-weight: 300;
     padding: 0;
     margin:0;
-    background-color: #f4f4f4;
+    background-color: var(--background);
 }
 
 * {
@@ -101,6 +104,45 @@ ul {
     margin-top: 10px !important;
 }
 
+.disclaimer {
+    color: var(--background);
+    background-color: var(--disclaimer);
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.disclaimer_small {
+    font-size: 12px;
+}
+
+.phase_text {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.bold_text {
+    font-weight: bold;
+}
+
+.color_healthy {
+    color: var(--healthy-stats);
+    font-weight: bold;
+}
+
+.color_sick {
+    color: var(--symptomatic);
+    font-weight: bold;
+}
+
+.color_dead {
+    color: var(--dead);
+    font-weight: bold;
+}
+
+.color_recovered {
+    color: var(--recovered);
+    font-weight: bold;
+}
 
 
 .percent__title {
@@ -110,8 +152,9 @@ ul {
 
 .wrapper {
     display: grid;
-    grid-template-areas: 'header canvas'
-                         'footer canvas';
+    grid-template-columns: min(400px, 30%);
+    grid-template-areas: 'header map_area'
+                         'footer map_area';
     height: 100%;
     width: 100%;
     background-color: #f4f4f4;
@@ -123,13 +166,13 @@ ul {
     grid-area: header;
     color: #575757;
     min-width: 300px;
-    width: 300px;
+    max-width: 400px;
 }
 
 
 .footer {
     min-width: 300px;
-    width: 300px;
+    max-width: 400px;
     grid-area: footer;
     padding: 20px;
     padding-top: 0;
@@ -137,8 +180,6 @@ ul {
 
 #canvas {
     position: fixed;
-    left: 300px;
-    
     grid-area: canvas;
     flex: 1;
     /* min-width: 750px;
@@ -297,9 +338,14 @@ ul {
     cursor: pointer;
 }
 
+.map_area {
+    position: relative;
+    grid-area: map_area;
+}
+
 .modal__day {
-    left: 300px;
     width: auto;
+    position: absolute;
 }
 
 .modal__day .modal__inner {
@@ -330,7 +376,6 @@ ul {
 
 #instructions_modal {
     position: absolute;
-    height: fit-content;
 }
 
 
@@ -367,7 +412,7 @@ ul {
     .wrapper {
         height: initial;
         grid-template-areas: 'header'
-        'canvas'
+        'map_area'
         'footer';
     }
 
@@ -386,6 +431,15 @@ ul {
     #canvas {
         position: relative;
         left: 0;
+    }
+
+    .map_area {
+        left: 0;
+        width: 100%;
+    }
+
+    .status__bar-scale {
+        display: none;
     }
 }
 

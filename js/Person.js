@@ -51,6 +51,14 @@ class Person {
     }
   }
 
+  draw_count(count) {
+    this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
+    this.context.font = 'bold 20px sans-serif';
+    this.context.fillStyle = InfectedColors[InfectedState.SYMPTOMATIC];
+    this.context.fillText(count.toString(), this.dot.x, this.dot.y);
+  }
+
   /**
    * Temporarily updates dot position for moving animation.
    *
@@ -73,7 +81,12 @@ class Person {
     }
   }
 
-  make_sick() { this.infectedState = InfectedState.ASYMPTOMATIC; }
+  make_sick(sick_days) { 
+    this.infectedState = InfectedState.ASYMPTOMATIC;
+    while (this.sick_days < sick_days) {
+      this.next_day();
+    }
+  }
 
   next_day(random) {
     if (this.is_sick()) {
@@ -94,10 +107,27 @@ class Person {
     }
   }
 
+  change_happiness(offset) {
+    this.happiness += offset;
+    if (this.happiness < 0) {
+      this.happiness = 0;
+    }
+    if (this.happiness > 100) {
+      this.happiness = 100;
+    }
+  }
+
   is_contagious() { return this.infectedState == InfectedState.PRESYMPTOMATIC; }
 
   is_sick() {
     return this.infectedState != InfectedState.HEALTHY;
+  }
+
+  is_countable() {
+    const contable_states = new Set([
+      InfectedState.SYMPTOMATIC, InfectedState.RECOVERED, InfectedState.DEAD
+    ]);
+    return contable_states.has(this.infectedState);
   }
 
   can_work() {

@@ -35,9 +35,9 @@ El estado cambia de un día al siguiente. Las transiciones son:
 
 * Sano -> Sano (si no tuvo contacto con ningún contagiado)
 * Sano -> Contagiado sin síntomas 
-    (p = 0.08, si estuvo en contacto con un contagiado pre-síntomas en espacio laboral)
+    (p = 0.3, si estuvo en contacto con un contagiado pre-síntomas en espacio laboral)
 * Sano -> Contagiado sin síntomas 
-    (p = 0.3, si estuvo en contacto con un contagiado pre-síntomas en una reunión)
+    (p = 0.6, si estuvo en contacto con un contagiado pre-síntomas en una reunión)
 * Contagiado sin síntomas -> Contagiado pre-síntomas
     (p = 1 a los 5 días de haber pasado a contagiado sin síntomas)
 * Contagiado pre-síntomas -> Contagiado con síntomas

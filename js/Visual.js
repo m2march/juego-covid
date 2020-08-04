@@ -6,12 +6,6 @@ function initVisual() {
   $("#jugar_btn").click(toggleFunctionGenerator("intro_modal"));
   $("#day_btn").click(toggleFunctionGenerator("day_modal"));
 
-  for (var i = 0; i < 3; i++) {
-    var text = $("#instructions_text").html();
-    text = text + text;
-    $("#instructions_text").html(text);
-  }
-
   $(".stats__of1000").each((k, v) => v.innerText = "/" + Game.p_total);
   $(".stats__days .stats__of1000").each((k, v) => v.innerText = "/" + Game.d_total);
   $("#mobility_input").on('input', (evt) => $("#mobility").text($("#mobility_input").val()));
@@ -20,6 +14,15 @@ function initVisual() {
   $("#meetings_input").val(Game.init_meetings);
   $("#mobility").text($("#mobility_input").val())
   $("#meetings").text($("#meetings_input").val())
+
+  $("#ph__meeting_no").text(Game.t_meetings);
+  $("#ph__total_ppl").text(Game.p_total);
+  $("#ph__total_ws").text(Game.w_total);
+  $("#ph__init_sick").text(Game.init_sick.length);
+  $("#ph__meeting_happiness").text(Game.meeting_happiness);
+  $("#ph__work_happiness").text(Game.work_happiness);
+  $("#ph__w_contagion").text(Game.w_contagion);
+  $("#ph__m_contagion").text(Game.m_contagion);
 }
 
 function toggleFunctionGenerator(id) {

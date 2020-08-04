@@ -15,7 +15,7 @@
     </script>
     -->
     <meta charset="UTF-8">
-    <title>Corona.io - Juego de simulación de Covid-19</title>
+    <title>Corona.io - Juego de simulación de Covid-19 (beta 0.1)</title>
     <meta name="description"
         content="Containing the spread of COVID-19 is everyone’s responsibility. Even if you aren't showing any symptoms, the best thing you can do is to stay home. Self-isolation, i.e., staying at home, will only work to stop this virus if everyone does it.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -45,8 +45,14 @@
 
     <div class="intro modal" id="intro_modal">
         <div class="modal__inner">
-            <h1 class="header__title">CORONA.IO</h1>
+            <h1 class="header__title">CORONA.IO (beta 0.1)</h1>
             <h2>Juego de simulación de Covid-19</h2>
+            <p class="disclaimer">
+            Este juego tiene <span style="font-weight: bold">solo</span> fines
+            educativos. Las probabiliades de contagio así como la duración en
+            días de las etapas de COVID-19 están aproximadas y simplificadas de
+            datos reales.
+            </p>
             <p>
             El juego consiste en lograr la menor cantidad de muertes,
             tratando de preservar la felicidad poblacional, tomando dos
@@ -70,53 +76,20 @@
        </div>
     </div>
     
-    <div class="modal modal__day modal--is-hidden" id="day_modal">
-        <div class="modal__inner">
-            <h1 class="header__title">DÍA: <span id="current_day">10</span></h1>
-            <table style="width: 100%">
-                <tr>
-                    <td><h2>Nuevos casos: <span id="new_cases"></span></h2>
-                    <td class="day__column_sep"></td>
-                    <td><h2>Nuevas muertes: <span id="new_deaths"></span></h2>
-                </tr>
-                <tr>
-                    <td><canvas id="plot_cases" class="plot"></canvas></td>
-                    <td class="day__column_sep"></td>
-                    <td><canvas id="plot_deaths" class="plot"></canvas></td>
-                </tr>
-                <tr>
-                    <th colspan="2" style="text-align: left; padding-top: 3%;"><h2>¿Qué hacemos hoy?</h2></th>
-                </tr>
-                <tr>
-                    <td>
-                        <h3>Movilidad de trabajadores: 
-                            <span id="mobility">YY</span>
-                        </h3>
-                        <input class="percent__input" type="range" style="width:100%"
-                        min=".01" max=".99" step=".01" value=".2"
-                        id="mobility_input">
-                    </td>
-                    <td class="day__column_sep"></td>
-                    <td>
-                        <h3>Reuniones: <span
-                                    id="meetings">XX</span></h3>
-                        <input class="percent__input" type="range" style="width:100%"
-                        min="0" max="20" step="1" value="2" id="meetings_input">
-                    </td>
-                </tr>
-            </table>
-            <button class="modal__button" id="day_btn" value="day">
-                Empezar el día
-            </button>
-        </div>
-    </div>
 
     <div class="modal modal--is-hidden" id="instructions_modal">
         <div class="modal__inner">
-            <div class="modal__close"><a id="close_instructions_link" href="#">x</a></div>
-            <h1 class="header__title">CORONA.IO</h1>
+            <div class="modal__close"><a id="close_instructions_link"
+                                         class="bold_text color_dead" href="#">X</a></div>
+            <h1 class="header__title">CORONA.IO (beta 0.1)</h1>
             <h2>Juego de simulación de Covid-19</h2>
             <div id="instructions_text">
+            <p class="disclaimer">
+            Este juego tiene <span style="font-weight: bold">solo</span> fines
+            educativos. Las probabiliades de contagio así como la duración en
+            días de las etapas de COVID-19 están aproximadas y simplificadas de
+            datos reales.
+            </p>
             <p>
             El juego consiste en lograr la menor cantidad de muertes,
             tratando de preservar la felicidad poblacional, tomando dos
@@ -128,11 +101,74 @@
             <li>Cuál es el tamaño máximo de reuniones entre personas.</li>
             </ul>
 
+            <h2> Reglas </h2>
             <p>
-            El principio de cada dia se te presentará cuantas personas tienen
-            síntomas y deberás decidir cómo se desarrollará ese día. El juego
-            permite jugar 100 días.
+            <h3> Personas </h3>
+
+            Las personas pasan por 5 estados:
+
+            <ul>
+                <li> <span class="color_healthy">Sano</span>
+                <li> <span class="color_healthy">Contagiado</span>: día 0
+                <li> <span class="color_healthy">Contagiado
+                            pre-síntomas</span>: día 5, puede contagiar
+                <li> <span class="color_sick">Enfermo</span>: día 7, hace
+                    cuarentena estricta
+                <li> Día 9, se <span class="color_recovered">recupera
+                            </span> (probabilidad 0.97) o <span
+                                              class="color_dead"> muere </span>
+                            (probabilidad 0.03)
+            </ul>
             </p>
+
+            <h3> Días </h3>
+            <p>
+            Los días consisten de dos etapas:
+
+            <ul>
+                <li> <span class="phase_text">Trabajo:</span> de la población no
+                    enferma, un porcentaje definido al iniciar el día a sus
+                    lugares de trabajo. Al estar en el trabajo, puede
+                    contagiarse de quienes comparten el espacio, con
+                    probabilidad de <span id="ph__w_contagion">X</span>, por cada persona.
+                <li> <span class="phase_text">Reuniones:</span> de la población
+                    no enferma, <span id="ph__meeting_no">X</span> personas
+                    realizan reuniones con la cantidad de personas permitidas
+                    al iniciar el día. No pueden invitar a personas con
+                    síntomas. En la reunión, quienes asisten pueden contaigarse
+                    de personas enfermas (pre-sintomáticas), con probabilidad
+                    <span id="ph__m_contagion">X</span>.
+            </ul>
+            </p>
+
+            <h3> Felicidad </h3>
+            <p>
+            Las personas empiezan con 100 puntos de felicidad. Cada día su
+            felicidad se modifica de la siguiente forma:
+            
+            <ul>
+                <li> <span class="bold_text"><span
+                           id="ph__work_happiness">X</span></span> si no asisten a trabajar
+                    ese día.
+                    <li> <span class="bold_text">+<span
+                               id="ph__meeting_happiness">X</span></span> por cada persona con la
+                    que se reunen se día.
+            </ul>
+
+            Las personas <span class="color_dead">muertas</span> no suman a la
+            felicidad total.
+            </p>
+
+            <h3>Inicio </h3>
+            <p>
+            Nuestra ciudad virtual cuenta con <span id="ph__total_ppl">X</span>
+            habitantes. Tambien hay <span id="ph__total_ws">X</span> lugares de
+            trabajo.
+
+            En el día 0, hay <span id="ph__init_sick">X</span> personas
+            enfermas sin síntomas.  
+            </p>
+
             </div>
         </div>
     </div>
@@ -154,6 +190,12 @@
         <div class="header">
             <h1 class="header__title">CORONA.IO</h1>
             <h2>Juego de simulación de contagios de COVID-19</h2>
+            <p class="disclaimer disclaimer_small">
+            Este juego tiene <span style="font-weight: bold">solo</span> fines
+            educativos. Las probabiliades de contagio así como la duración en
+            días de las etapas de COVID-19 están aproximadas y simplificadas de
+            datos reales.
+            </p>
             <p class="header__description">
             El juego consiste en lograr la menor cantidad de muertes,
             tratando de preservar la felicidad poblacional, tomando dos
@@ -212,7 +254,7 @@
                     </div>
                 </div>
                 <div class="stat">
-                    <h1 class="stats__header stats__symptomatic">SINTOMÁTICOS: <span
+                    <h1 class="stats__header stats__symptomatic">ENFERMOS: <span
                             class="stats__stat-figure stats__symptomatic-count"></span><span
                             class="stats__of1000">/1000</span></h1>
                     <div class="status__bar-scale">
@@ -243,25 +285,69 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <h2>REFERENCES</h2>
+        <div class="footer">
+            <h2>CRÉDITOS</h2>
+            <p>
+            Realizado por <a href="http://github.com/m2march">M2-March</a>
+            </p>
+
             <p>
             Fuertemente inspirado en el trabajo de 
-                <a target="_blank" href="https://www.linkedin.com/in/mikedodg/">
-                    Mike Dodge
-                        <img class="linkedin"
-                            src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" />
-                </a>:
-
-                <li><a target="_blank" href="http://covid19simulator.com/">
-                    http://covid19simulator.com
-                </a>
-                </li>
+            <a target="_blank"
+                href="https://www.linkedin.com/in/mikedodg/">Mike Dodge
+                <img class="linkedin" src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg"/>
+            </a>
+            > <a target="_blank"
+                    href="http://covid19simulator.com/">http://covid19simulator.com</a>
             </p>
         </div>
-        <canvas id="canvas" width="100" height="100">
-            Your browser does not support the HTML5 canvas tag.
-        </canvas>
+        <div class="map_area">
+            <div class="modal modal__day modal--is-hidden" id="day_modal">
+                <div class="modal__inner">
+                    <h1 class="header__title">DÍA: <span id="current_day">10</span></h1>
+                    <table style="width: 100%">
+                        <tr>
+                            <td><h2>Nuevos casos: <span id="new_cases">CC</span></h2>
+                            <td class="day__column_sep"></td>
+                            <td><h2>Nuevas muertes: <span id="new_deaths">DD</span></h2>
+                        </tr>
+                        <tr>
+                            <td><canvas id="plot_cases" class="plot"></canvas></td>
+                            <td class="day__column_sep"></td>
+                            <td><canvas id="plot_deaths" class="plot"></canvas></td>
+                        </tr>
+                        <tr>
+                            <th colspan="2" style="text-align: left; padding-top: 3%;"><h2>¿Qué hacemos hoy?</h2></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h3>Movilidad de trabajadores: 
+                                    <span id="mobility">YY</span>
+                                </h3>
+                                <input class="percent__input" type="range" style="width:100%"
+                                min=".01" max=".99" step=".01" value=".2"
+                                id="mobility_input">
+                            </td>
+                            <td class="day__column_sep"></td>
+                            <td>
+                                <h3>Reuniones: <span
+                                            id="meetings">XX</span></h3>
+                                <input class="percent__input" type="range" style="width:100%"
+                                min="0" max="20" step="1" value="2" id="meetings_input">
+                            </td>
+                        </tr>
+                    </table>
+                    <button class="modal__button" id="day_btn" value="day">
+                        Empezar el día
+                    </button>
+                </div>
+            </div>
+            <canvas id="canvas" width="100" height="100">
+                Your browser does not support the HTML5 canvas tag.
+            </canvas>
+        </div>
     </div>
     <script>
         // Listen to the onLoad event, then create a game world

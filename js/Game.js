@@ -11,6 +11,7 @@ class Game {
     this.context = null;
 
     this.desktopMarginOffset = 300;
+    this.mobileBreakPointWidth = this.desktopMarginOffset;
 
     this.totalPeople = 1000;
 
@@ -24,7 +25,9 @@ class Game {
     this.context = this.canvas.getContext('2d');
     this.random = new Random('115');
 
-    this.canvas.width = window.innerWidth - this.desktopMarginOffset;
+    this.gridLeftWidth = $(".header")[0].offsetWidth;
+
+    this.canvas.width = window.innerWidth < this.mobileBreakPointWidth ? window.innerWidth : window.innerWidth - this.gridLeftWidth;
     this.canvas.height = window.innerHeight;
 
     this.canvasLeft = 0;
@@ -85,9 +88,9 @@ class Game {
         data: {
           labels: [...this.stats.keys()],
           datasets: [{
-            label: "Muertes acumuladas",
+            label: "Nuevas Muertes",
             data: [this.extractStats(InfectedState.DEAD)],
-            //backgroundColor: InfectedColors[InfectedState.DEAD]
+            backgroundColor: InfectedColors[InfectedState.DEAD]
           }]
         },
       }
@@ -98,9 +101,9 @@ class Game {
         data: {
           labels: [...this.stats.keys()],
           datasets: [{
-            label: "Casos acumulados",
+            label: "Nuevos Casos",
             data: [this.extractStats(InfectedState.SYMPTOMATIC)],
-            //backgroundColor: InfectedColors[InfectedState.SYMPTOMATIC]
+            backgroundColor: InfectedColors[InfectedState.SYMPTOMATIC]
           }]
         },
       }
@@ -152,15 +155,20 @@ class Game {
   }
 
   first_sick() {
-    for (var pi in this.p_priority) {
-      var p = this.p_priority[pi];
-      var w_assignment = this.workspace_assignment[p.index];
-      var coworkers = this.workspace_assignment.filter((x) => x == w_assignment);
-      if (coworkers.length > 13) {
-        p.make_sick();
-        return;
+    var pi = 0;
+    Game.init_sick.forEach((sick_days) => {
+      while (true) {
+        var p = this.p_priority[pi];
+        var w_assignment = this.workspace_assignment[p.index];
+        var coworkers = this.workspace_assignment.filter((x) => x == w_assignment);
+        if (coworkers.length > 13) {
+          p.make_sick(sick_days);
+          pi++;
+          break;
+        }
+        pi++;
       }
-    }
+    });
   }
 
   /**
@@ -181,8 +189,15 @@ class Game {
     var can_work_ppl = this.p_priority.filter((p) => p.can_work());
     var will_work_count = Math.round(can_work_ppl.length * mobility_percent);
 
+    var ppl_who_work = new Set();
     for (var i = 0; i < will_work_count; i++) {
       workspaces[can_work_ppl[i].workspace_index].push(can_work_ppl[i]);
+      ppl_who_work.add(can_work_ppl[i]);
+    }
+    for (var i = 0; i < this.ppl.length; i++) {
+      if (!ppl_who_work.has(this.ppl[i])) {
+        this.ppl[i].change_happiness(Game.work_happiness);
+      }
     }
 
     workspaces.forEach((ps) => {
@@ -261,11 +276,82 @@ class Game {
         if (elapsed < Game.animation_settings.goBackHomeDur) {
           window.requestAnimationFrame(step.bind(this));
         } else {
+          start = timestamp;
+          animation_phase = Game.day_phases.MID_DAY;
+          window.requestAnimationFrame(step.bind(this));
+        }
+      } else if (animation_phase == Game.day_phases.MID_DAY) {
+        if (elapsed > Game.animation_settings.waitForMeetings) {
+          start = timestamp;
+          animation_phase = Game.day_phases.GO_TO_MEETING;
+        } 
+        window.requestAnimationFrame(step.bind(this));
+      } else if (animation_phase == Game.day_phases.GO_TO_MEETING) {
+        if (elapsed < Game.animation_settings.goToMeetingsDur) {
+          var progress = elapsed / Game.animation_settings.goToMeetingsDur;
+        } else {
+          var progress = 1;
+        }
+
+        for (var mi = 0; mi < meetings.length; mi++) {
+          var meeting = meetings[mi];
+          var host = meeting[0];
+          for (var p of meetings[mi]) {
+            p.go_to(host.dot.x, host.dot.y, progress);
+          }
+        }
+        this.draw();
+
+        if (elapsed < Game.animation_settings.goToMeetingsDur) {
+          window.requestAnimationFrame(step.bind(this));
+        } else {
+          start = timestamp;
+          animation_phase = Game.day_phases.STAY_IN_MEETING;
+          for (var mi = 0; mi < meetings.length; mi++) {
+            var meeting = meetings[mi];
+            meeting[0].draw_count(meeting.length);
+          }
+          window.requestAnimationFrame(step.bind(this));
+        }
+      } else if (animation_phase == Game.day_phases.STAY_IN_MEETING) {
+        if (elapsed > Game.animation_settings.stayInMeetingsDur) {
+          start = timestamp;
+          animation_phase = Game.day_phases.GO_BACK_FROM_MEETING;
+        } 
+        window.requestAnimationFrame(step.bind(this));
+      } else if (animation_phase == Game.day_phases.GO_BACK_FROM_MEETING) {
+        if (elapsed < Game.animation_settings.goBackHomeDur) {
+          var progress = elapsed / Game.animation_settings.goBackHomeDur;
+        } else {
+          var progress = 1;
+        }
+
+        for (var mi = 0; mi < meetings.length; mi++) {
+          var meeting = meetings[mi];
+          var host = meeting[0];
+          for (var p of meetings[mi]) {
+            p.go_to(host.dot.x, host.dot.y, 1 - progress);
+          }
+        }
+        this.draw();
+
+        if (elapsed < Game.animation_settings.goBackHomeDur) {
+          window.requestAnimationFrame(step.bind(this));
+        } else {
+          start = timestamp;
+          animation_phase = Game.day_phases.END_DAY;
+          this.endDay();
+          window.requestAnimationFrame(step.bind(this));
+        }
+      } else if (animation_phase == Game.day_phases.END_DAY) {
+        if (elapsed > Game.animation_settings.endDayDur) {
           start = undefined;
           animation_phase = Game.day_phases.END;
-          this.endDay();
+          this.queryDay();
+        } else {
+          window.requestAnimationFrame(step.bind(this));
         }
-      } 
+      }
     }
 
     window.requestAnimationFrame(step.bind(this));
@@ -311,6 +397,9 @@ class Game {
     }
 
     meetings.forEach((ps) => this.contagion(ps, Game.m_contagion));
+    meetings.forEach((ps) => 
+      ps.forEach((p) => p.change_happiness((ps.length - 1) * Game.meeting_happiness))
+    );
 
     return meetings;
   }
@@ -355,7 +444,6 @@ class Game {
     this.days++;
     this.updateStats();
     this.draw();
-    this.queryDay();
   }
 
   generateStats() {
@@ -365,6 +453,7 @@ class Game {
       stats[InfectedState.SYMPTOMATIC] = 0;
       stats[InfectedState.RECOVERED] = 0;
       stats[InfectedState.DEAD] = 0;
+      stats['cases'] = 0;
       stats['happiness'] = 0;
 
       this.ppl.forEach((p) => {
@@ -376,6 +465,9 @@ class Game {
           stats[InfectedState.DEAD]++;
         } else {
           stats[InfectedState.HEALTHY]++;
+        }
+        if (p.is_countable()) {
+          stats['cases']++;
         }
         stats['happiness'] += p.happiness;
       });
@@ -414,15 +506,27 @@ class Game {
     return ret;
   }
 
+  arrayDiff(values) {
+    var ret = [0];
+    for (var i = 1; i < values.length; i++) {
+      ret.push(values[i] - values[i-1]);
+    }
+    return ret;
+  }
+
   queryDay() {
     console.log([...this.stats.keys()]);
     this.plot_cases.data.labels = [...this.stats.keys()];
-    this.plot_cases.data.datasets[0].data = this.extractStats(InfectedState.SYMPTOMATIC);
+    var cases_data = this.arrayDiff(this.extractStats('cases'));
+    this.plot_cases.data.datasets[0].data = cases_data;
     this.plot_cases.update();
     this.plot_deaths.data.labels = [...this.stats.keys()];
-    this.plot_deaths.data.datasets[0].data = this.extractStats(InfectedState.DEAD);
+    var deaths_data = this.arrayDiff(this.extractStats(InfectedState.DEAD));
+    this.plot_deaths.data.datasets[0].data = deaths_data;
     this.plot_deaths.update();
 
+    $("#new_cases").text(cases_data[cases_data.length - 1]);
+    $("#new_deaths").text(deaths_data[deaths_data.length - 1]);
     $("#current_day").text(this.days);
     document.querySelector("#" + 'day_modal').classList.toggle("modal--is-hidden");
   }
@@ -460,19 +564,29 @@ Game.d_total = 100;
 
 Game.init_meetings = 2;
 Game.init_mobility = 0.75;
+Game.init_sick = [2,3,4,5,6]
+
+Game.meeting_happiness = 5;
+Game.work_happiness = -1;
 
 Game.animation_settings = {
   goToWorkplacesDur: 1 * 1000,
   stayInWorkplacesDur: 2 * 1000,
   goBackHomeDur: 1 * 1000,
-  waitForMeetings: 3,
-  goToMeetingsDur: 1.2,
-  stayInMeetingsDur: 2,
+  waitForMeetings: 1 * 1000,
+  goToMeetingsDur: 1 * 1000,
+  stayInMeetingsDur: 2 * 1000,
+  endDayDur: 2 * 1000
 }
 
 Game.day_phases = {
   GO_TO_WORK: 0,
   STAY_IN_WORK: 1,
   GO_BACK_FROM_WORK: 2,
+  MID_DAY: 3,
+  GO_TO_MEETING: 4,
+  STAY_IN_MEETING: 5,
+  GO_BACK_FROM_MEETING: 6,
+  END_DAY: 7,
   END: -1
 };
