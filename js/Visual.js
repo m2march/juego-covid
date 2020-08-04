@@ -8,12 +8,12 @@ function initVisual() {
 
   $(".stats__of1000").each((k, v) => v.innerText = "/" + Game.p_total);
   $(".stats__days .stats__of1000").each((k, v) => v.innerText = "/" + Game.d_total);
-  $("#mobility_input").on('input', (evt) => $("#mobility").text($("#mobility_input").val() * 100));
+  $("#mobility_input").on('input', (evt) => $("#mobility").text(Math.round($("#mobility_input").val() * 100)));
   $("#meetings_input").on('input', (evt) => $("#meetings").text($("#meetings_input").val()));
-  $("#mobility_input").val(Game.init_mobility * 100);
+  $("#mobility_input").val(Game.init_mobility);
   $("#meetings_input").val(Game.init_meetings);
-  $("#mobility").text($("#mobility_input").val())
-  $("#meetings").text($("#meetings_input").val())
+  $("#mobility").text(Math.round($("#mobility_input").val() * 100));
+  $("#meetings").text($("#meetings_input").val());
 
   $("#ph__meeting_no").text(Game.t_meetings);
   $("#ph__total_ppl").text(Game.p_total);
