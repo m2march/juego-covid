@@ -11,6 +11,7 @@
     /* --text: #666666; */
     --text: #555555;
     --disclaimer: #DE7254;
+    --future-work: #de9b54;
 
     --background: #f4f4f4;
 
@@ -109,6 +110,19 @@ ul {
     background-color: var(--disclaimer);
     border-radius: 3px;
     padding: 5px;
+}
+
+.future_work {
+    margin-top: 12px;
+    color: #FFFFFF;
+    background-color: var(--future-work);
+    border-radius: 3px;
+    padding: 1px;
+    padding-left: 8px;
+}
+
+.future_work ul {
+    margin-left: 10px;
 }
 
 .disclaimer_small {
@@ -311,7 +325,7 @@ ul {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 3;
     transition: opacity 300ms linear;
 }
 .modal__inner {
@@ -358,6 +372,7 @@ ul {
 
 #day_modal .modal__inner {
     width: 70%;
+    z-index: 5;
 }
 
 .modal__day td {
@@ -376,6 +391,7 @@ ul {
 
 #instructions_modal {
     position: absolute;
+    z-index: 10;
 }
 
 
