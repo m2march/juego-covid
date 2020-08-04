@@ -45,7 +45,7 @@
 
     <div class="intro modal" id="intro_modal">
         <div class="modal__inner">
-            <h1 class="header__title">CORONA.IO (beta 0.1)</h1>
+            <h1 class="header__title">CORONA.IO <span style="font-size: 16px">(beta 0.1)</span></h1>
             <h2>Juego de simulación de Covid-19</h2>
             <p class="disclaimer">
             Este juego tiene <span style="font-weight: bold">solo</span> fines
@@ -76,12 +76,35 @@
        </div>
     </div>
     
+    <div class="modal modal--is-hidden" id="end_modal">
+        <div class="modal__inner">
+            <h1 class="header__title">Fin de la partida</h1>
+            <div id="no_sick" class="modal--is-hidden">
+            <h2>No hay más personas enfermas en la población</h2>
+            </div>
+            <div id="all_days" class="modal--is-hidden">
+            <h2>Pasaron 100 días</h2>
+            </div>
+            </br>
+            <h3>Tus resultados son:</h3>
+            <p >
+                    <h1 class="stats__header stats__dead">MUERTOS: <span
+                            class="stats__stat-figure stats__dead-count-end"></span><span
+                            class="stats__of1000">/1000</span></h1>
+                    <h1 class="stats__header stats__happiness">FELICIDAD: <span
+                            class="stats__stat-figure
+                            stats__happiness-count-end"></span></h1>
+            </p>
+            </div>
+       </div>
+    </div>
+    
 
     <div class="modal modal--is-hidden" id="instructions_modal">
         <div class="modal__inner">
             <div class="modal__close"><a id="close_instructions_link"
                                          class="bold_text color_dead" href="#">X</a></div>
-            <h1 class="header__title">CORONA.IO (beta 0.1)</h1>
+            <h1 class="header__title">CORONA.IO <span style="font-size: 16px">(beta 0.1)</span></h1>
             <h2>Juego de simulación de Covid-19</h2>
             <div id="instructions_text">
             <p class="disclaimer">
@@ -188,7 +211,7 @@
     </div>
     <div class="wrapper">
         <div class="header">
-            <h1 class="header__title">CORONA.IO</h1>
+            <h1 class="header__title">CORONA.IO <span style="font-size: 16px">(beta 0.1)</span></h1>
             <h2>Juego de simulación de contagios de COVID-19</h2>
             <p class="disclaimer disclaimer_small">
             Este juego tiene <span style="font-weight: bold">solo</span> fines

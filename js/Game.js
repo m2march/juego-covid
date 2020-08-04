@@ -62,9 +62,15 @@ class Game {
     this.recoveredCountEl = document.querySelector('.stats__recovered-count');
     this.deadCountEl = document.querySelector('.stats__dead-count');
     this.happinessCountEl = document.querySelector('.stats__happiness-count');
+    this.deadCountEndEl = document.querySelector('.stats__dead-count-end');
+    this.happinessCountEndEl = document.querySelector('.stats__happiness-count-end');
 
     this.mobilityInput = document.querySelector('#mobility_input');
     this.meetingsInput = document.querySelector('#meetings_input');
+
+    this.endModal = document.querySelector('#end_modal');
+    this.endModal_NoSick = document.querySelector('#no_sick');
+    this.endModal_AllDays = document.querySelector('#all_days');
 
     this.dayBtn = document.querySelector('#day_btn');
     this.dayBtn.addEventListener('click', this.performDay.bind(this));
@@ -340,8 +346,9 @@ class Game {
         } else {
           start = timestamp;
           animation_phase = Game.day_phases.END_DAY;
-          this.endDay();
-          window.requestAnimationFrame(step.bind(this));
+          if (!this.endDay()) {
+            window.requestAnimationFrame(step.bind(this));
+          }
         }
       } else if (animation_phase == Game.day_phases.END_DAY) {
         if (elapsed > Game.animation_settings.endDayDur) {
@@ -444,6 +451,27 @@ class Game {
     this.days++;
     this.updateStats();
     this.draw();
+    if (this.days >= Game.d_total) {
+      this.endGame(true);
+      return true;
+    } else if (!this.anySick()) {
+      this.endGame(false);
+      return true;
+    }
+  }
+
+  anySick() {
+    return this.ppl.filter((p) => p.is_sick()).length > 0;
+  }
+
+  endGame(all_days) {
+    this.ended = true;
+    if (all_days) {
+      this.endModal_AllDays.classList.remove("modal--is-hidden");
+    } else {
+      this.endModal_NoSick.classList.remove("modal--is-hidden");
+    }
+    this.endModal.classList.remove("modal--is-hidden");
   }
 
   generateStats() {
@@ -487,6 +515,8 @@ class Game {
     this.recoveredCountEl.textContent = stats[InfectedState.RECOVERED];
     this.deadCountEl.textContent = stats[InfectedState.DEAD];
     this.happinessCountEl.textContent = stats['happiness'];
+    this.deadCountEndEl.textContent = stats[InfectedState.DEAD];
+    this.happinessCountEndEl.textContent = stats['happiness'];
 
     /*
     this.statusBarHealthyEl.style.transform = `scaleX(${totalHealthyCount / 1000})`;
